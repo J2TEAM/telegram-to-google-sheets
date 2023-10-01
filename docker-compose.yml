@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  telesheet-bot:
+    build: .
+    container_name: telesheet-bot
+    restart: unless-stopped
