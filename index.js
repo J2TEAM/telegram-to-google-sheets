@@ -11,11 +11,11 @@ import 'dotenv/config';
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
-bot.onText(/\/add (.+)/, (msg, match) => {
+bot.onText(/\/chi (.+)/, (msg, match) => {
     const chatId = msg.chat.id;
 
     if (!match[1].includes('|')) {
-        bot.sendMessage(chatId, 'Vui lòng nhập đúng định dạng.' + '\n\n' + 'Ví dụ:\n```\n/add name|email\n```', {
+        bot.sendMessage(chatId, 'Vui lòng nhập đúng định dạng.' + '\n\n' + 'Ví dụ:\n```\n/add chi_amount|chi_note\n```', {
             parse_mode: 'Markdown'
         });
         return;
@@ -27,20 +27,57 @@ bot.onText(/\/add (.+)/, (msg, match) => {
     const values = resp.split('|');
 
     const url = new URL(process.env.WEBHOOK_URL);
-    url.searchParams.append('name', values[0]);
-    url.searchParams.append('email', values[1]);
+    url.searchParams.append('chi_amount', values[0]);
+    url.searchParams.append('chi_note', values[1]);
 
     fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                bot.sendMessage(chatId, '✅ Đã thêm thành công.');
+        .then(res => {
+            if (res.status === 200) {
+                return;
             } else {
-                bot.sendMessage(chatId, 'Không thể thêm. Vui lòng thử lại sau!');
+                throw new Error('Failed to fetch data');
             }
+            })
+        .then(data => {
+            bot.sendMessage(chatId, '✅ Đã thêm thành công.');
         })
         .catch(err => {
-            bot.sendMessage(chatId, 'Đã có lỗi xảy ra. Vui lòng thử lại sau!');
+            bot.sendMessage(chatId, 'Không thể thêm. Vui lòng thử lại sau!');
+        });
+});
+
+bot.onText(/\/thu (.+)/, (msg, match) => {
+    const chatId = msg.chat.id;
+
+    if (!match[1].includes('|')) {
+        bot.sendMessage(chatId, 'Vui lòng nhập đúng định dạng.' + '\n\n' + 'Ví dụ:\n```\n/add thu_amount|thu_note\n```', {
+            parse_mode: 'Markdown'
+        });
+        return;
+    }
+
+    bot.sendChatAction(chatId, 'typing');
+
+    const resp = match[1];
+    const values = resp.split('|');
+
+    const url = new URL(process.env.WEBHOOK_URL);
+    url.searchParams.append('thu_amount', values[0]);
+    url.searchParams.append('thu_note', values[1]);
+
+    fetch(url)
+        .then(res => {
+            if (res.status === 200) {
+                return;
+            } else {
+                throw new Error('Failed to fetch data');
+            }
+            })
+        .then(data => {
+            bot.sendMessage(chatId, '✅ Đã thêm thành công.');
+        })
+        .catch(err => {
+            bot.sendMessage(chatId, 'Không thể thêm. Vui lòng thử lại sau!');
         });
 });
 
